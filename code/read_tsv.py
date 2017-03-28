@@ -2,7 +2,6 @@ import numpy as np
 from gensim import corpora, models
 from nltk.tokenize import RegexpTokenizer
 import codecs
-from sklearn import svm
 from gensim.matutils import corpus2csc
 import pickle
 import pandas as pd
@@ -12,6 +11,9 @@ import random
 from sklearn.metrics import precision_score, recall_score, accuracy_score, f1_score
 from collections import defaultdict
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
 
 training_data_path = '../data/train.tsv'
 test_data_path = '../data/test.tsv'
@@ -139,7 +141,7 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 # Apply machine learning model
 #==============================================================================
 # Scaling training data for SVM training
-scaler = StandardScaler()
+scaler = StandardScaler(with_mean=False)
 corpus_sparse = scaler.fit_transform(corpus_sparse)
 
 C_range = np.logspace(-2, 10, 13)
@@ -154,7 +156,7 @@ print("The best parameters are %s with a score of %0.2f"
 
 
 # SVM
-model = svm.SVC(C=100, gamma=0.001)
+model = SVC(C=100, gamma=0.001)
 model.fit(corpus_sparse, labels)
 
 # Find out the best parameters for SVM
