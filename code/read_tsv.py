@@ -142,9 +142,9 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 # Apply machine learning model
 #==============================================================================
 # Scaling training data for SVM training
-scaler = StandardScaler(with_mean=False)
-corpus_sparse = scaler.fit_transform(corpus_sparse)
-test_corpus_sparse = scaler.fit_transform(test_corpus_sparse)
+# scaler = StandardScaler(with_mean=False)
+# corpus_sparse = scaler.fit_transform(corpus_sparse)
+# test_corpus_sparse = scaler.fit_transform(test_corpus_sparse)
 
 
 C_range = np.logspace(-2, 10, 13)
@@ -162,18 +162,18 @@ print("The best parameters are %s with a score of %0.2f"
 
 
 # SVM
-model = SVC(C=100, gamma=0.001)
+# model = SVC(C=100, gamma=0.001)
 
 # Linear SVC
 model = LinearSVC(C=100, penalty='l1', dual=False)
 
 # MLP
-model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+# model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 
 # Adaboost
-model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1),
-                         algorithm="SAMME",
-                         n_estimators=200)
+# model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1),
+#                          algorithm="SAMME",
+#                          n_estimators=200)
 
 model.fit(corpus_sparse, labels)
 
@@ -185,9 +185,9 @@ training_pre = precision_score(labels, training_res)
 training_f1 = f1_score(labels, training_res)
 
 # Save model
-save_model(model, 'svm', num_dims)
-
-test_res = model.predict(test_corpus_sparse)
+# save_model(model, 'svm', num_dims)
+# 
+# test_res = model.predict(test_corpus_sparse)
 
 #s = pd.Series(test_res, index=test_text_idx, columns=['Id', 'Category'])
 s = pd.DataFrame({'Category':test_res})
