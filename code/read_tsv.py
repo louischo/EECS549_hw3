@@ -144,13 +144,16 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 scaler = StandardScaler(with_mean=False)
 corpus_sparse = scaler.fit_transform(corpus_sparse)
 
-C_range = np.logspace(-2, 10, 13)
-gamma_range = np.logspace(-9, 3, 13)
+C_range = np.logspace(-2, 5, 8)
+gamma_range = np.logspace(-5, 2, 8)
 param_grid = dict(gamma=gamma_range, C=C_range)
 cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
 grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
 grid.fit(corpus_sparse, labels)
 
+with open("svm_param.txt", "w") as f:
+	f.write("The best parameters are %s with a score of %0.2f"
+      % (grid.best_params_, grid.best_score_))
 print("The best parameters are %s with a score of %0.2f"
       % (grid.best_params_, grid.best_score_))
 
