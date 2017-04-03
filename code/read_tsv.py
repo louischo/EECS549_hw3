@@ -5,15 +5,16 @@ import codecs
 from gensim.matutils import corpus2csc
 import pickle
 import pandas as pd
-#from sklearn.ensemble import AdaBoostClassifier
-#from sklearn.tree import DecisionTreeClassifier
 import random
-from sklearn.metrics import precision_score, recall_score, accuracy_score, f1_score
 from collections import defaultdict
+from sklearn.metrics import precision_score, recall_score, accuracy_score, f1_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 training_data_path = '../data/train.tsv'
 test_data_path = '../data/test.tsv'
@@ -143,12 +144,14 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 # Scaling training data for SVM training
 scaler = StandardScaler(with_mean=False)
 corpus_sparse = scaler.fit_transform(corpus_sparse)
+test_corpus_sparse = scaler.fit_transform(test_corpus_sparse)
 
-C_range = np.logspace(-2, 5, 8)
-gamma_range = np.logspace(-5, 2, 8)
-param_grid = dict(gamma=gamma_range, C=C_range)
+
+C_range = np.logspace(-2, 10, 13)
+#gamma_range = np.logspace(-9, 3, 13)
+param_grid = dict(C=C_range)
 cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
-grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv)
+grid = GridSearchCV(LinearSVC(penalty='l1', dual=False), param_grid=param_grid, cv=cv)
 grid.fit(corpus_sparse, labels)
 
 with open("svm_param.txt", "w") as f:
@@ -160,17 +163,19 @@ print("The best parameters are %s with a score of %0.2f"
 
 # SVM
 model = SVC(C=100, gamma=0.001)
-model.fit(corpus_sparse, labels)
 
-# Find out the best parameters for SVM
+# Linear SVC
+model = LinearSVC(C=100, penalty='l1', dual=False)
+
+# MLP
+model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 
 # Adaboost
-#model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1),
-#                         algorithm="SAMME",
-#                         n_estimators=200)
-#model.fit(corpus_sparse, labels)
+model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1),
+                         algorithm="SAMME",
+                         n_estimators=200)
 
-
+model.fit(corpus_sparse, labels)
 
 
 training_res = model.predict(corpus_sparse)
