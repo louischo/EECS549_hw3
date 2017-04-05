@@ -1,6 +1,7 @@
 import numpy as np
 from gensim import corpora, models
 from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
 from gensim.matutils import corpus2csc
 #import pickle
 import pandas as pd
@@ -15,10 +16,11 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
 import xgboost as xgb
+from xgboost.sklearn import XGBClassifier
 
 training_data_path = '../data/train.tsv'
 test_data_path = '../data/test.tsv'
-stop_list_path = '../data/stoplist.txt'
+stop_list_path = '../data/mystoplist.txt'
 
 #==============================================================================
 # Function definition
@@ -42,6 +44,7 @@ def lsi_transform(corpus, num_dims):
 #        pickle.dump(model, f, pickle.HIGHEST_PROTOCOL)
 #    print('Model saved to: ' + '../data/' + model_name + '_model_feat' + str(num_feats) + '.pickle')
 
+
 #==============================================================================
 # Build stop list and load data
 #==============================================================================
@@ -51,6 +54,7 @@ with open(stop_list_path, "r+") as f:
       if not line.strip():
     	  continue
       stop_list.add(line.strip().lower())
+#stop_list = set(stopwords.words('english'))
 
 train_data = pd.read_csv(training_data_path, sep='\t')
 labels = list(train_data['label'])
@@ -61,9 +65,10 @@ tokenizer = RegexpTokenizer(r'[a-zA-Z]{1,}')
 text_list = []
 for line in comments:
     text_not_filtered = tokenizer.tokenize(line)
-#    filtered_text = [word.lower() for word in text_not_filtered \
-#                     if word.lower() not in stop_list]
-    filtered_text = [word.lower() for word in text_not_filtered]
+#    text_not_filtered = line.split()
+    filtered_text = [word.lower() for word in text_not_filtered \
+                     if word.lower() not in stop_list]
+#    filtered_text = [word.lower() for word in text_not_filtered]
     text_list.append(filtered_text)
 #    text_list.append(text_not_filtered)
 
@@ -72,9 +77,10 @@ comments = list(test_data['comment'])
 test_text_list = []
 for line in comments:
     text_not_filtered = tokenizer.tokenize(line)
-#    filtered_text = [word.lower() for word in text_not_filtered \
-#                     if word.lower() not in stop_list]
-    filtered_text = [word.lower() for word in text_not_filtered]
+#    text_not_filtered = line.split()
+    filtered_text = [word.lower() for word in text_not_filtered \
+                     if word.lower() not in stop_list]
+#    filtered_text = [word.lower() for word in text_not_filtered]
     test_text_list.append(filtered_text)
 #    test_text_list.append(text_not_filtered)
 
@@ -145,10 +151,28 @@ model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(1000, 100,
 
 # Adaboost
 #model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), algorithm="SAMME", n_estimators=200)
+
+# XGBoost sklearn
+model = XGBClassifier(learning_rate=0.1,
+                      n_estimators=100,
+                      max_depth=5,
+                      min_child_weight=1,
+                      gamma=0,
+                      subsample=0.8,
+                      colsample_bytree=0.8,
+                      objective= 'binary:logistic',
+                      nthread=4,
+                      scale_pos_weight=1,
+                      seed=27)
+
+
+
+
 model.fit(corpus_sparse, labels)
 scores = cross_val_score(model, corpus_sparse, labels, cv=5)
 
-## XGBoost
+
+## XGBoost 
 ## read in data
 #dtrain = xgb.DMatrix(corpus_sparse, labels)
 #dtest = xgb.DMatrix(test_corpus_sparse)
@@ -159,6 +183,7 @@ scores = cross_val_score(model, corpus_sparse, labels, cv=5)
 ## make prediction
 #training_res = bst.predict(dtrain)
 #training_res = [int(x) for x in training_res > 0.5]
+
 
 
 
