@@ -14,7 +14,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import cross_val_score
-import xgboost as xgb
+# import xgboost as xgb
 
 training_data_path = '../data/train.tsv'
 test_data_path = '../data/test.tsv'
@@ -119,17 +119,17 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 
 
 #C_range = np.logspace(-2, 4, 7)
-C_range = np.linspace(0.7,0.8,11)
-param_grid = dict(C=C_range)
-cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
-grid = GridSearchCV(LinearSVC(penalty='l1', dual=False), param_grid=param_grid, cv=cv)
-grid.fit(corpus_sparse, labels)
-
-with open("svm_param.txt", "w") as f:
-	f.write("The best parameters are %s with a score of %0.2f"
-      % (grid.best_params_, grid.best_score_))
-print("The best parameters are %s with a score of %0.2f"
-      % (grid.best_params_, grid.best_score_))
+# C_range = np.linspace(0.7,0.8,11)
+# param_grid = dict(C=C_range)
+# cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+# grid = GridSearchCV(LinearSVC(penalty='l1', dual=False), param_grid=param_grid, cv=cv)
+# grid.fit(corpus_sparse, labels)
+# 
+# with open("svm_param.txt", "w") as f:
+# 	f.write("The best parameters are %s with a score of %0.2f"
+#       % (grid.best_params_, grid.best_score_))
+# print("The best parameters are %s with a score of %0.2f"
+#       % (grid.best_params_, grid.best_score_))
 
 
 # SVM
@@ -137,7 +137,7 @@ print("The best parameters are %s with a score of %0.2f"
 
 # Linear SVC
 #model = LinearSVC(C=1.0, penalty='l1', dual=False, class_weight='balanced')
-model = LinearSVC(C=0.78, penalty='l1', dual=False)
+# model = LinearSVC(C=0.78, penalty='l1', dual=False)
 #model = LinearSVC(C=1.0)
 
 # MLP
@@ -147,6 +147,8 @@ model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(1000, 100,
 #model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), algorithm="SAMME", n_estimators=200)
 model.fit(corpus_sparse, labels)
 scores = cross_val_score(model, corpus_sparse, labels, cv=5)
+with open("mlp_scores.txt", "w") as f:
+	f.write("The best parameters are %s with a score of %0.2f" % (grid.best_params_, grid.best_score_))
 
 ## XGBoost
 ## read in data
@@ -162,7 +164,7 @@ scores = cross_val_score(model, corpus_sparse, labels, cv=5)
 
 
 
-training_res = grid.predict(corpus_sparse)
+# training_res = grid.predict(corpus_sparse)
 training_res = model.predict(corpus_sparse)
 training_acc = accuracy_score(labels, training_res)
 training_rec = recall_score(labels, training_res)
@@ -171,7 +173,7 @@ training_f1 = f1_score(labels, training_res)
 
 # Save model
 # save_model(model, 'svm', num_dims)
-test_res = grid.predict(test_corpus_sparse)
+# test_res = grid.predict(test_corpus_sparse)
 test_res = model.predict(test_corpus_sparse)
 
 #s = pd.Series(test_res, index=test_text_idx, columns=['Id', 'Category'])
