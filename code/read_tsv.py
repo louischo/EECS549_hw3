@@ -154,7 +154,7 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 
 # XGBoost sklearn
 model = XGBClassifier(learning_rate=0.1,
-                      n_estimators=100,
+                      n_estimators=1000,
                       max_depth=5,
                       min_child_weight=1,
                       gamma=0,
