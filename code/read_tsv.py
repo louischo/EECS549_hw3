@@ -20,7 +20,7 @@ from xgboost.sklearn import XGBClassifier
 
 training_data_path = '../data/train.tsv'
 test_data_path = '../data/test.tsv'
-stop_list_path = '../data/mystoplist.txt'
+stop_list_path = '../data/stoplist.txt'
 
 #==============================================================================
 # Function definition
@@ -153,26 +153,30 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 #model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), algorithm="SAMME", n_estimators=200)
 
 # XGBoost sklearn
-model = XGBClassifier(learning_rate=0.1,
-                      n_estimators=100,
-                      max_depth=5,
-                      min_child_weight=1,
-                      gamma=0,
-                      subsample=0.8,
-                      colsample_bytree=0.8,
-                      objective= 'binary:logistic',
-                      nthread=4,
-                      scale_pos_weight=1,
-                      seed=27)
-
-
-
+param_test1 = {'max_depth':range(3,10,2),'min_child_weight':range(1,6,2)}
+model = GridSearchCV(estimator = XGBClassifier(learning_rate =0.1, n_estimators=1000, gamma=0, subsample=0.8, colsample_bytree=0.8, 
+					      objective= 'binary:logistic', nthread=4, scale_pos_weight=1, seed=27), 
+	   	    param_grid = param_test1, n_jobs=4, iid=False, cv=5)
+# model = XGBClassifier(learning_rate=0.1,
+#                       n_estimators=1000,
+#                       max_depth=5,
+#                       min_child_weight=1,
+#                       gamma=0,
+#                       subsample=0.8,
+#                       colsample_bytree=0.8,
+#                       objective= 'binary:logistic',
+#                       nthread=4,
+#                       scale_pos_weight=1,
+#                       seed=27)
 
 model.fit(corpus_sparse, labels)
-scores = cross_val_score(model, corpus_sparse, labels, cv=5)
-with open("mlp_scores.txt", "w") as f:
-	f.write("The best parameters are %s with a score of %0.2f" % (grid.best_params_, grid.best_score_))
+with open("xgb_param.txt", "w") as f:
+	f.write("The best parameters are %s with a score of %0.2f" % (model.best_params_, model.best_score_))
 
+
+# scores = cross_val_score(model, corpus_sparse, labels, cv=5)
+# with open("xgb_scores.txt", "w") as f:
+# 	f.write("The CV score is: %s" % (scores))
 
 ## XGBoost
 ## read in data
@@ -189,7 +193,7 @@ with open("mlp_scores.txt", "w") as f:
 
 
 
-training_res = grid.predict(corpus_sparse)
+# training_res = grid.predict(corpus_sparse)
 training_res = model.predict(corpus_sparse)
 training_acc = accuracy_score(labels, training_res)
 training_rec = recall_score(labels, training_res)
