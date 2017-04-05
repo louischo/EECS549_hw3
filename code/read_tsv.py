@@ -25,19 +25,19 @@ stop_list_path = '../data/mystoplist.txt'
 #==============================================================================
 # Function definition
 #==============================================================================
-def tfidf_transform(corpus):    
-    # Create a tf-idf model 
+def tfidf_transform(corpus):
+    # Create a tf-idf model
     tfidf = models.TfidfModel(corpus) # Initialize tf-idf model
     corpus_tfidf = tfidf[corpus] # Transform the whole corpus
     print('TF-IDF model created.')
     return corpus_tfidf
-def lsi_transform(corpus, num_dims):    
-    # Create a LSI model
-    lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=num_dims)
-    corpus_lsi = lsi[corpus]
-    print('LSI corpus created.')
-    
-    return lsi, corpus_lsi
+#def lsi_transform(corpus, num_dims):
+#    # Create a LSI model
+#    lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=num_dims)
+#    corpus_lsi = lsi[corpus]
+#    print('LSI corpus created.')
+#
+#    return lsi, corpus_lsi
 #
 #def save_model(model, model_name, num_feats):
 #    with open('../data/' + model_name + '_model_feat' + str(num_feats) + '.pickle', 'wb') as f:
@@ -125,17 +125,17 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 
 
 #C_range = np.logspace(-2, 4, 7)
-C_range = np.linspace(0.7,0.8,11)
-param_grid = dict(C=C_range)
-cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
-grid = GridSearchCV(LinearSVC(penalty='l1', dual=False), param_grid=param_grid, cv=cv)
-grid.fit(corpus_sparse, labels)
-
-with open("svm_param.txt", "w") as f:
-	f.write("The best parameters are %s with a score of %0.2f"
-      % (grid.best_params_, grid.best_score_))
-print("The best parameters are %s with a score of %0.2f"
-      % (grid.best_params_, grid.best_score_))
+# C_range = np.linspace(0.7,0.8,11)
+# param_grid = dict(C=C_range)
+# cv = StratifiedShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+# grid = GridSearchCV(LinearSVC(penalty='l1', dual=False), param_grid=param_grid, cv=cv)
+# grid.fit(corpus_sparse, labels)
+#
+# with open("svm_param.txt", "w") as f:
+# 	f.write("The best parameters are %s with a score of %0.2f"
+#       % (grid.best_params_, grid.best_score_))
+# print("The best parameters are %s with a score of %0.2f"
+#       % (grid.best_params_, grid.best_score_))
 
 
 # SVM
@@ -143,11 +143,11 @@ print("The best parameters are %s with a score of %0.2f"
 
 # Linear SVC
 #model = LinearSVC(C=1.0, penalty='l1', dual=False, class_weight='balanced')
-model = LinearSVC(C=0.78, penalty='l1', dual=False)
+# model = LinearSVC(C=0.78, penalty='l1', dual=False)
 #model = LinearSVC(C=1.0)
 
 # MLP
-model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(1000, 100, 10, 2), random_state=1)
+# model = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(1000, 100, 10, 2), random_state=1)
 
 # Adaboost
 #model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), algorithm="SAMME", n_estimators=200)
@@ -170,9 +170,11 @@ model = XGBClassifier(learning_rate=0.1,
 
 model.fit(corpus_sparse, labels)
 scores = cross_val_score(model, corpus_sparse, labels, cv=5)
+with open("mlp_scores.txt", "w") as f:
+	f.write("The best parameters are %s with a score of %0.2f" % (grid.best_params_, grid.best_score_))
 
 
-## XGBoost 
+## XGBoost
 ## read in data
 #dtrain = xgb.DMatrix(corpus_sparse, labels)
 #dtest = xgb.DMatrix(test_corpus_sparse)
@@ -196,9 +198,9 @@ training_f1 = f1_score(labels, training_res)
 
 # Save model
 # save_model(model, 'svm', num_dims)
-test_res = grid.predict(test_corpus_sparse)
+# test_res = grid.predict(test_corpus_sparse)
 test_res = model.predict(test_corpus_sparse)
 
 #s = pd.Series(test_res, index=test_text_idx, columns=['Id', 'Category'])
 s = pd.DataFrame({'Category':test_res})
-csv = s.to_csv('../data/test_res_svc_c1.csv')
+csv = s.to_csv('../data/test_res_xgboost.csv')
