@@ -153,9 +153,21 @@ test_corpus_sparse = corpus2csc(test_corpus, num_terms=len(mapping)).transpose()
 #model = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), algorithm="SAMME", n_estimators=200)
 
 # XGBoost sklearn
+model = XGBClassifier(learning_rate=0.1,
+                      n_estimators=100,
+                      max_depth=5,
+                      min_child_weight=1,
+                      gamma=0,
+                      subsample=0.8,
+                      colsample_bytree=0.8,
+                      objective= 'binary:logistic',
+                      nthread=4,
+                      scale_pos_weight=1,
+                      seed=27)
+
 param_test1 = {'max_depth':range(3,10,2),'min_child_weight':range(1,6,2)}
-model = GridSearchCV(estimator = XGBClassifier(learning_rate =0.1, n_estimators=1000, gamma=0, subsample=0.8, colsample_bytree=0.8, 
-					      objective= 'binary:logistic', nthread=4, scale_pos_weight=1, seed=27), 
+model = GridSearchCV(estimator = XGBClassifier(learning_rate =0.1, n_estimators=1000, gamma=0, subsample=0.8, colsample_bytree=0.8,
+					      objective= 'binary:logistic', nthread=4, scale_pos_weight=1, seed=27),
 	   	    param_grid = param_test1, n_jobs=4, iid=False, cv=5)
 # model = XGBClassifier(learning_rate=0.1,
 #                       n_estimators=1000,
