@@ -66,9 +66,9 @@ text_list = []
 for line in comments:
     text_not_filtered = tokenizer.tokenize(line)
 #    text_not_filtered = line.split()
-    filtered_text = [word.lower() for word in text_not_filtered \
-                     if word.lower() not in stop_list]
-#    filtered_text = [word.lower() for word in text_not_filtered]
+#    filtered_text = [word.lower() for word in text_not_filtered \
+#                     if word.lower() not in stop_list]
+    filtered_text = [word.lower() for word in text_not_filtered]
     text_list.append(filtered_text)
 #    text_list.append(text_not_filtered)
 
@@ -78,9 +78,9 @@ test_text_list = []
 for line in comments:
     text_not_filtered = tokenizer.tokenize(line)
 #    text_not_filtered = line.split()
-    filtered_text = [word.lower() for word in text_not_filtered \
-                     if word.lower() not in stop_list]
-#    filtered_text = [word.lower() for word in text_not_filtered]
+#    filtered_text = [word.lower() for word in text_not_filtered \
+#                     if word.lower() not in stop_list]
+    filtered_text = [word.lower() for word in text_not_filtered]
     test_text_list.append(filtered_text)
 #    test_text_list.append(text_not_filtered)
 
